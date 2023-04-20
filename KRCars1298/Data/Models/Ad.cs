@@ -8,6 +8,7 @@ namespace KRCars1298.Data.Models
     public class Ad : BaseModel
     {
         public Model Model { get; set; }
+        public Guid ModelId { get; set; }
         public string ImageUrl { get; set; }
         public int Year { get; set; }
         public string Fuel { get; set; }

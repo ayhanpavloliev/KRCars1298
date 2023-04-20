@@ -34,7 +34,7 @@ namespace KRCars1298.Migrations
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("ModelId")
+                    b.Property<Guid>("ModelId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Price")
@@ -301,7 +301,9 @@ namespace KRCars1298.Migrations
                 {
                     b.HasOne("KRCars1298.Data.Models.Model", "Model")
                         .WithMany()
-                        .HasForeignKey("ModelId");
+                        .HasForeignKey("ModelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("KRCars1298.Data.Models.User", "User")
                         .WithMany()
