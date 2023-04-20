@@ -10,11 +10,11 @@ using KRCars1298.Data.Models;
 
 namespace KRCars1298.Controllers
 {
-    public class BrandsController : Controller
+    public class BrandController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public BrandsController(ApplicationDbContext context)
+        public BrandController(ApplicationDbContext context)
         {
             _context = context;
         }
