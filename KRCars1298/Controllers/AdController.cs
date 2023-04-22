@@ -86,6 +86,10 @@ namespace KRCars1298.Controllers
             if (ModelState.IsValid)
             {
                 ad.Id = Guid.NewGuid();
+                string currentUser = base.User.Identity.Name;
+
+                ad.User = this.dbContext.Users.FirstOrDefault(u => u.UserName == currentUser);
+
                 this.dbContext.Add(ad);
                 await this.dbContext.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
