@@ -37,6 +37,7 @@ namespace KRCars1298
             services.AddDatabaseDeveloperPageExceptionFilter();
 
             services.AddDefaultIdentity<User>()
+                .AddDefaultTokenProviders().AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddControllersWithViews();
         }

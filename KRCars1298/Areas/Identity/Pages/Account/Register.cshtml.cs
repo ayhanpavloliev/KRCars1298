@@ -79,6 +79,17 @@ namespace KRCars1298.Areas.Identity.Pages.Account
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {
+                    // Setting roles
+                    bool isAdmin = Input.Email == "admin@email.com";
+                    if (isAdmin)
+                    {
+                        await this._userManager.AddToRoleAsync(user, "Admin");
+                    }
+                    else
+                    {
+                        await this._userManager.AddToRoleAsync(user, "User");
+                    }
+
                     _logger.LogInformation("User created a new account with password.");
 
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
