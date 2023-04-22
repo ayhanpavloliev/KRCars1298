@@ -1,14 +1,14 @@
 ﻿using KRCars1298.Data.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.IO;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace KRCars1298.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class RoleController : Controller
     {
         private readonly RoleManager<IdentityRole> roleManager;

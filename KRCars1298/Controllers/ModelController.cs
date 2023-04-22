@@ -7,9 +7,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using KRCars1298.Data;
 using KRCars1298.Data.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace KRCars1298.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ModelController : Controller
     {
         private readonly ApplicationDbContext _context;

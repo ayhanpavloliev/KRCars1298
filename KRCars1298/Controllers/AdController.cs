@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using KRCars1298.Data;
 using KRCars1298.Data.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace KRCars1298.Controllers
 {
@@ -43,6 +42,7 @@ namespace KRCars1298.Controllers
             return View(ad);
         }
 
+        [Authorize(Roles = "User")]
         // GET: Ad/Create
         public IActionResult Create()
         {
@@ -52,6 +52,7 @@ namespace KRCars1298.Controllers
         // POST: Ad/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = "User")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ModelId,ImageUrl,Year,Fuel,Description,Price,Id")] Ad ad)
@@ -67,6 +68,7 @@ namespace KRCars1298.Controllers
         }
 
         // GET: Ad/Edit/5
+        [Authorize(Roles = "User")]
         public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
@@ -85,6 +87,7 @@ namespace KRCars1298.Controllers
         // POST: Ad/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = "User")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Guid id, [Bind("ModelId,ImageUrl,Year,Fuel,Description,Price,Id")] Ad ad)
@@ -118,6 +121,7 @@ namespace KRCars1298.Controllers
         }
 
         // GET: Ad/Delete/5
+        [Authorize(Roles = "User")]
         public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
@@ -136,6 +140,7 @@ namespace KRCars1298.Controllers
         }
 
         // POST: Ad/Delete/5
+        [Authorize(Roles = "User")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
