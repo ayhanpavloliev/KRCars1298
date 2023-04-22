@@ -6,22 +6,48 @@ using Microsoft.EntityFrameworkCore;
 using KRCars1298.Data;
 using KRCars1298.Data.Models;
 using Microsoft.AspNetCore.Authorization;
+using KRCars1298.Data.Models.ViewModels;
+using Microsoft.AspNetCore.Identity;
 
 namespace KRCars1298.Controllers
 {
     public class AdController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext dbContext;
+        private readonly UserManager<User> userManager;
 
-        public AdController(ApplicationDbContext context)
+        public AdController(ApplicationDbContext context, UserManager<User> userManager)
         {
-            _context = context;
+            this.dbContext = context;
+            this.userManager = userManager;
         }
 
         // GET: Ad
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Ads.ToListAsync());
+            Ad[] ads = this.dbContext.Ads.Include(a => a.User).ToArray();
+            AdsListViewModel[] adsViewModels = new AdsListViewModel[ads.Length];
+
+            for (int i = 0; i < ads.Length; i++)
+            {
+                adsViewModels[i] = new AdsListViewModel
+                {
+                    Id = ads[i].Id.ToString(),
+                    ImageUrl = ads[i].ImageUrl,
+                    Year = ads[i].Year,
+                    Fuel = ads[i].Fuel,
+                    Price = ads[i].Price,
+                };
+
+                Model model = this.dbContext.Models.FirstOrDefault(m => m.Id == ads[i].ModelId);
+                adsViewModels[i].Model = model.Name;
+                adsViewModels[i].Brand = this.dbContext.Brands.FirstOrDefault(b => b.Id == model.BrandId).Name;
+
+                Console.WriteLine(this.dbContext.Users.FirstOrDefault(u => u.Id == ads[i].User.Id).City);
+                adsViewModels[i].City = this.dbContext.Users.FirstOrDefault(u => u.Id == ads[i].User.Id).City;
+            }
+
+            return View(adsViewModels);
         }
 
         // GET: Ad/Details/5
@@ -32,7 +58,7 @@ namespace KRCars1298.Controllers
                 return NotFound();
             }
 
-            var ad = await _context.Ads
+            var ad = await this.dbContext.Ads
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (ad == null)
             {
@@ -60,8 +86,8 @@ namespace KRCars1298.Controllers
             if (ModelState.IsValid)
             {
                 ad.Id = Guid.NewGuid();
-                _context.Add(ad);
-                await _context.SaveChangesAsync();
+                this.dbContext.Add(ad);
+                await this.dbContext.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(ad);
@@ -76,7 +102,7 @@ namespace KRCars1298.Controllers
                 return NotFound();
             }
 
-            var ad = await _context.Ads.FindAsync(id);
+            var ad = await this.dbContext.Ads.FindAsync(id);
             if (ad == null)
             {
                 return NotFound();
@@ -101,8 +127,8 @@ namespace KRCars1298.Controllers
             {
                 try
                 {
-                    _context.Update(ad);
-                    await _context.SaveChangesAsync();
+                    this.dbContext.Update(ad);
+                    await this.dbContext.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -129,7 +155,7 @@ namespace KRCars1298.Controllers
                 return NotFound();
             }
 
-            var ad = await _context.Ads
+            var ad = await this.dbContext.Ads
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (ad == null)
             {
@@ -145,15 +171,15 @@ namespace KRCars1298.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var ad = await _context.Ads.FindAsync(id);
-            _context.Ads.Remove(ad);
-            await _context.SaveChangesAsync();
+            var ad = await this.dbContext.Ads.FindAsync(id);
+            this.dbContext.Ads.Remove(ad);
+            await this.dbContext.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool AdExists(Guid id)
         {
-            return _context.Ads.Any(e => e.Id == id);
+            return this.dbContext.Ads.Any(e => e.Id == id);
         }
     }
 }
