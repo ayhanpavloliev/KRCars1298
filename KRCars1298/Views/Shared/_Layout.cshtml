@@ -23,9 +23,9 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-@*                        <li class="nav-item">
+                        <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>*@
+                        </li>
                         @*<li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>*@
@@ -59,7 +59,22 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2023 - KRCars1298 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; @DateTime.Now.Year - KRCars1298
+            <a asp-area="" asp-controller="Home" asp-action="Index" style="margin-left: 1em; margin-right: 0.5em">Home</a>
+            <a asp-area="" asp-controller="Ad" asp-action="Index" style="margin-left: 0.5em; margin-right: 0.5em">All Ads</a>
+            @if (singInManager.IsSignedIn(User))
+            {
+                if (User.IsInRole("User"))
+                {
+                    <a asp-area="" asp-controller="Ad" asp-action="Index" style="margin-left: 0.5em; margin-right: 0.5em">My Ads</a>
+                }
+                else if (User.IsInRole("Admin"))
+                {
+                    <a asp-area="" asp-controller="Brand" asp-action="Index" style="margin-left: 0.5em; margin-right: 0.5em">Brands</a>
+                    <a asp-area="" asp-controller="Model" asp-action="Index" style="margin-left: 0.5em; margin-right: 0.5em">Models</a>
+                    <a asp-area="" asp-controller="Role" asp-action="Index" style="margin-left: 0.5em; margin-right: 0.5em">Roles</a>
+                }
+            }
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

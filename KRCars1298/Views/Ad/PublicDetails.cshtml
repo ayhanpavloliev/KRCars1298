@@ -1,5 +1,5 @@
 ﻿@using KRCars1298.Data.Models.ViewModels;
-@model AdDetailsBaseViewModel;
+@model AdFullDetailsViewModel;
 
 @{
     ViewData["Title"] = $"{Model.CarFullName} - KRCars1298";
@@ -23,39 +23,53 @@
         <dd class="col-sm-10">
             @Model.ModelName
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             Image
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             <img src="@Model.ImageUrl" style="width: 30em; height: 15em"></img>
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Year)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Year)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Fuel)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Fuel)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Description)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Description)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Price)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Price)
         </dd>
+        <dt class="col-sm-2">
+            Owner
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.OwnerFullName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.City)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.City)
+        </dd>
+        <dt class="col-sm-2">
+            Phone Number
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PhoneNumber)
+        </dd>
     </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
 </div>

@@ -67,6 +67,11 @@ namespace KRCars1298.Areas.Identity.Pages.Account
             public string City { get; set; }
 
             [Required]
+            [Phone]
+            [Display(Name = "Phone Number")]
+            public string PhoneNumber { get; set; }
+
+            [Required]
             [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
@@ -96,7 +101,8 @@ namespace KRCars1298.Areas.Identity.Pages.Account
                     Email = Input.Email,
                     FirstName = Input.FirstName,
                     LastName = Input.LastName,
-                    City = Input.City
+                    City = Input.City,
+                    PhoneNumber = Input.PhoneNumber
                 };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)

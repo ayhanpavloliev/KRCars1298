@@ -58,14 +58,63 @@ namespace KRCars1298.Controllers
                 return NotFound();
             }
 
-            var ad = await this.dbContext.Ads
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var ad = await this.dbContext.Ads.Include(a => a.Model).ThenInclude(m => m.Brand)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            AdDetailsBaseViewModel adViewModel = new AdDetailsBaseViewModel()
+            {
+                Id = ad.Id,
+                BrandName = ad.Model.Brand.Name,
+                ModelName = ad.Model.Name,
+                ImageUrl= ad.ImageUrl,
+                Year = ad.Year,
+                Fuel = ad.Fuel,
+                Description = ad.Description,
+                Price = ad.Price
+            };
+
             if (ad == null)
             {
                 return NotFound();
             }
 
-            return View(ad);
+            return View(adViewModel);
+        }
+
+        // GET: Ad/Details/5
+        public async Task<IActionResult> PublicDetails(Guid? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var ad = await this.dbContext.Ads.Include(a => a.Model).ThenInclude(m => m.Brand)
+                                                .Include(a => a.User)
+                                                .FirstOrDefaultAsync(a => a.Id == id);
+
+            AdFullDetailsViewModel adViewModel = new AdFullDetailsViewModel()
+            {
+                Id = ad.Id,
+                BrandName = ad.Model.Brand.Name,
+                ModelName = ad.Model.Name,
+                ImageUrl = ad.ImageUrl,
+                Year = ad.Year,
+                Fuel = ad.Fuel,
+                Description = ad.Description,
+                Price = ad.Price,
+                FirstName = ad.User.FirstName,
+                LastName = ad.User.LastName,
+                City = ad.User.City,
+                PhoneNumber = ad.User.PhoneNumber
+            };
+
+            if (ad == null)
+            {
+                return NotFound();
+            }
+
+            return View(adViewModel);
         }
 
         [Authorize(Roles = "User")]
