@@ -1,4 +1,5 @@
-﻿@model KRCars1298.Data.Models.Model
+﻿@using KRCars1298.Data.Models.ViewModels;
+@model ManageModelViewModel;
 
 @{
     ViewData["Title"] = "Create Model";
@@ -18,8 +19,9 @@
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="BrandId" class="control-label"></label>
-                <input asp-for="BrandId" class="form-control" asp-items="ViewBag.BrandId"></input>
+                <label asp-for="BrandName" class="control-label">Brand</label>
+                <input asp-for="BrandName" class="form-control" />
+                <span asp-validation-for="BrandName" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />

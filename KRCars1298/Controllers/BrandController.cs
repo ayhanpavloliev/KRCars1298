@@ -143,6 +143,17 @@ namespace KRCars1298.Controllers
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var brand = await _context.Brands.FindAsync(id);
+            Model[] modelsToBeDeleted = _context.Models.Where(m => m.Brand.Id == id).ToArray();
+            List<Ad> adsToBeDeleted = new List<Ad>();
+
+            foreach (Model model in modelsToBeDeleted)
+            {
+                Ad[] adsToBeDeletedForModel = _context.Ads.Where(a => a.ModelId == model.Id).ToArray();
+                adsToBeDeleted.AddRange(adsToBeDeletedForModel);
+            }
+
+            _context.RemoveRange(adsToBeDeleted);
+            _context.RemoveRange(modelsToBeDeleted);
             _context.Brands.Remove(brand);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));

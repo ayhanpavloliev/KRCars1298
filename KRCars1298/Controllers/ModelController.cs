@@ -9,6 +9,9 @@ using KRCars1298.Data;
 using KRCars1298.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
+using KRCars1298.Data.Models.ViewModels;
+using System.Xml.Linq;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace KRCars1298.Controllers
 {
@@ -60,17 +63,31 @@ namespace KRCars1298.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,BrandId,Id")] Model model)
+        public async Task<IActionResult> Create(ManageModelViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
-                model.Id = Guid.NewGuid();
+                Brand brand = this._context.Brands.FirstOrDefault(b => b.Name == viewModel.BrandName);
+
+                if (brand == null)
+                {
+                    return NotFound();
+                }
+
+                Model model = new Model()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = viewModel.Name,
+                    Brand = brand,
+                    BrandId = brand.Id,
+                };
+
                 _context.Add(model);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["BrandId"] = new SelectList(_context.Brands, "Id", "Id", model.BrandId);
-            return View(model);
+            //ViewData["BrandId"] = new SelectList(_context.Brands, "Id", "Id", model.BrandId);
+            return View(viewModel);
         }
 
         // GET: Model/Edit/5
@@ -81,13 +98,20 @@ namespace KRCars1298.Controllers
                 return NotFound();
             }
 
-            var model = await _context.Models.FindAsync(id);
+            var model = _context.Models.Include(m => m.Brand).FirstOrDefault(m => m.Id == id);
             if (model == null)
             {
                 return NotFound();
             }
-            ViewData["BrandId"] = new SelectList(_context.Brands, "Id", "Id", model.BrandId);
-            return View(model);
+
+            ManageModelViewModel viewModel = new ManageModelViewModel()
+            {
+                Name = model.Name,
+                BrandName = model.Brand.Name
+            };
+
+            //ViewData["BrandId"] = new SelectList(_context.Brands, "Id", "Id", model.BrandId);
+            return View(viewModel);
         }
 
         // POST: Model/Edit/5
@@ -95,23 +119,36 @@ namespace KRCars1298.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Name,BrandId,Id")] Model model)
+        public async Task<IActionResult> Edit(Guid id, ManageModelViewModel viewModel)
         {
-            if (id != model.Id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try
                 {
+                    Brand brand = _context.Brands.FirstOrDefault(b => b.Name == viewModel.BrandName);
+
+                    if (brand == null)
+                    {
+                        return View(viewModel);
+                    }
+
+                    Model model = _context.Models.Include(m => m.Brand).FirstOrDefault(m => m.Id == id);
+
+                    if (model == null)
+                    {
+                        return View(viewModel);
+                    }
+
+                    model.Name = viewModel.Name;
+                    model.Brand = model.Brand;
+                    model.BrandId = model.Brand.Id;
+
                     _context.Update(model);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ModelExists(model.Id))
+                    if (!ModelExists(id))
                     {
                         return NotFound();
                     }
@@ -122,8 +159,8 @@ namespace KRCars1298.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["BrandId"] = new SelectList(_context.Brands, "Id", "Id", model.BrandId);
-            return View(model);
+            //ViewData["BrandId"] = new SelectList(_context.Brands, "Id", "Id", viewModel.BrandId);
+            return View(viewModel);
         }
 
         // GET: Model/Delete/5
@@ -151,7 +188,11 @@ namespace KRCars1298.Controllers
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var model = await _context.Models.FindAsync(id);
+            Ad[] adsToBeDeleted = _context.Ads.Where(a => a.ModelId == id).ToArray();
+
+            _context.Ads.RemoveRange(adsToBeDeleted);
             _context.Models.Remove(model);
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

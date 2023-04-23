@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace KRCars1298.Data.Models.ViewModels
+namespace KRCars1298.Data.Models.ViewModels.AdViewModels
 {
     public class AdFullDetailsViewModel : AdDetailsBaseViewModel
     {

@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using KRCars1298.Data;
 using KRCars1298.Data.Models;
 using Microsoft.AspNetCore.Authorization;
-using KRCars1298.Data.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
+using KRCars1298.Data.Models.ViewModels.AdViewModels;
 
 namespace KRCars1298.Controllers
 {
@@ -77,6 +77,7 @@ namespace KRCars1298.Controllers
         }
 
         // GET: Ad/Details/5
+        [Authorize(Roles = "User")]
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)

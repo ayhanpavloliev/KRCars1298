@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace KRCars1298.Data.Models.ViewModels
+namespace KRCars1298.Data.Models.ViewModels.AdViewModels
 {
     public class AdDetailsBaseViewModel
     {
@@ -9,7 +9,7 @@ namespace KRCars1298.Data.Models.ViewModels
 
         public string ModelName { get; set; }
 
-        public string CarFullName => $"{this.BrandName} {this.ModelName}";
+        public string CarFullName => $"{BrandName} {ModelName}";
 
         public string ImageUrl { get; set; }
 
