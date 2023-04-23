@@ -1,0 +1,66 @@
+﻿@using KRCars1298.Data.Models.ViewModels;
+@model IEnumerable<AdsListBaseViewModel>
+
+@{
+    ViewData["Title"] = "My Ads";
+}
+
+<h1>My Ads</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Name
+            </th>
+            <th>
+                Image
+            </th>
+            <th>
+                Year
+            </th>
+            <th>
+                Fuel
+            </th>
+            <th>
+                Price
+            </th>
+            <th>
+                Action
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <a asp-controller="Ad" asp-action="Details" asp-route-id="@item.Id">
+                        @Html.DisplayFor(modelItem => item.CarFullName)
+                    </a>
+                </td>
+                <td>
+                    <img src="@item.ImageUrl" style="width: 10em; height: 5em"></img>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Year)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Fuel)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Price)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    @*<a asp-action="Details" asp-route-id="@item.Id">Details</a> |*@
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+

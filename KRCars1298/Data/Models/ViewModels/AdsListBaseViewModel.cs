@@ -1,6 +1,6 @@
 ﻿namespace KRCars1298.Data.Models.ViewModels
 {
-    public class AdsListViewModel
+    public class AdsListBaseViewModel
     {
         public string Id { get; set; }
 
@@ -17,7 +17,5 @@
         public string Fuel { get; set; }
 
         public int Price { get; set; }
-
-        public string City { get; set; }
     }
 }

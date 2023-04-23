@@ -30,20 +30,34 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>*@
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Ad" asp-action="Index">Ads</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Ad" asp-action="Index">All Ads</a>
                         </li>
+                        @if (singInManager.IsSignedIn(User))
+                        {
+                            if (User.IsInRole("User"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Ad" asp-action="MyAds">My Ads</a>
+                                </li>
+                            }
+                            else if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Brand" asp-action="Index">Brands</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Model" asp-action="Index">Models</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Role" asp-action="Index">Roles</a>
+                                </li>
+                            }
+                        }
+
                         @if (singInManager.IsSignedIn(User) && User.IsInRole("Admin"))
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Brand" asp-action="Index">Brands</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Model" asp-action="Index">Models</a>
-                            </li>
 
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Role" asp-action="Index">Roles</a>
-                            </li>
                         }
                     </ul>
                     <partial name="_LoginPartial" />
@@ -66,7 +80,7 @@
             {
                 if (User.IsInRole("User"))
                 {
-                    <a asp-area="" asp-controller="Ad" asp-action="Index" style="margin-left: 0.5em; margin-right: 0.5em">My Ads</a>
+                    <a asp-area="" asp-controller="Ad" asp-action="MyAds" style="margin-left: 0.5em; margin-right: 0.5em">My Ads</a>
                 }
                 else if (User.IsInRole("Admin"))
                 {

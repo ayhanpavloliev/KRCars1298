@@ -26,11 +26,11 @@ namespace KRCars1298.Controllers
         public async Task<IActionResult> Index()
         {
             Ad[] ads = this.dbContext.Ads.Include(a => a.User).ToArray();
-            AdsListViewModel[] adsViewModels = new AdsListViewModel[ads.Length];
+            AllAdsListViewModel[] adsViewModels = new AllAdsListViewModel[ads.Length];
 
             for (int i = 0; i < ads.Length; i++)
             {
-                adsViewModels[i] = new AdsListViewModel
+                adsViewModels[i] = new AllAdsListViewModel
                 {
                     Id = ads[i].Id.ToString(),
                     ImageUrl = ads[i].ImageUrl,
@@ -43,8 +43,34 @@ namespace KRCars1298.Controllers
                 adsViewModels[i].Model = model.Name;
                 adsViewModels[i].Brand = this.dbContext.Brands.FirstOrDefault(b => b.Id == model.BrandId).Name;
 
-                Console.WriteLine(this.dbContext.Users.FirstOrDefault(u => u.Id == ads[i].User.Id).City);
                 adsViewModels[i].City = this.dbContext.Users.FirstOrDefault(u => u.Id == ads[i].User.Id).City;
+            }
+
+            return View(adsViewModels);
+        }
+
+        [Authorize(Roles="User")]
+        public async Task<IActionResult> MyAds()
+        {
+            string currentUserName = base.User.Identity.Name;
+
+            Ad[] ads = this.dbContext.Ads.Include(a => a.User).Where(a => a.User.UserName == currentUserName).ToArray();
+            AdsListBaseViewModel[] adsViewModels = new AdsListBaseViewModel[ads.Length];
+
+            for (int i = 0; i < ads.Length; i++)
+            {
+                adsViewModels[i] = new AdsListBaseViewModel
+                {
+                    Id = ads[i].Id.ToString(),
+                    ImageUrl = ads[i].ImageUrl,
+                    Year = ads[i].Year,
+                    Fuel = ads[i].Fuel,
+                    Price = ads[i].Price,
+                };
+
+                Model model = this.dbContext.Models.FirstOrDefault(m => m.Id == ads[i].ModelId);
+                adsViewModels[i].Model = model.Name;
+                adsViewModels[i].Brand = this.dbContext.Brands.FirstOrDefault(b => b.Id == model.BrandId).Name;
             }
 
             return View(adsViewModels);

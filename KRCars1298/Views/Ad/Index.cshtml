@@ -1,15 +1,12 @@
 ﻿@using KRCars1298.Data.Models.ViewModels;
-@model IEnumerable<AdsListViewModel>
+@model IEnumerable<AllAdsListViewModel>
 
 @{
-    ViewData["Title"] = "Ads";
+    ViewData["Title"] = "All Ads";
 }
 
-<h1>Index</h1>
+<h1>All Ads</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
 <table class="table">
     <thead>
         <tr>
@@ -22,12 +19,6 @@
             <th>
                 Year
             </th>
-@*            <th>
-                @Html.DisplayNameFor(model => model.Fuel)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>*@
             <th>
                 Fuel
             </th>
