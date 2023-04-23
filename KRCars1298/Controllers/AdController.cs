@@ -156,20 +156,40 @@ namespace KRCars1298.Controllers
         [Authorize(Roles = "User")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ModelId,ImageUrl,Year,Fuel,Description,Price,Id")] Ad ad)
+        public async Task<IActionResult> Create(ManageAdViewModel adViewModel)
         {
             if (ModelState.IsValid)
             {
-                ad.Id = Guid.NewGuid();
-                string currentUser = base.User.Identity.Name;
+                Model model = this.dbContext.Models.Include(m => m.Brand)
+                                    .FirstOrDefault(m => m.Name == adViewModel.Model &&
+                                                    m.Brand.Name == adViewModel.Brand);
 
-                ad.User = this.dbContext.Users.FirstOrDefault(u => u.UserName == currentUser);
+                if (model == null)
+                {
+                    return View(adViewModel);
+                }
+
+                string currentUser = base.User.Identity.Name;
+                User user = await this.userManager.FindByNameAsync(currentUser);
+
+                Ad ad = new Ad()
+                {
+                    Id = Guid.NewGuid(),
+                    Model = model,
+                    ModelId = model.Id,
+                    ImageUrl = adViewModel.ImageUrl,
+                    Year = adViewModel.Year,
+                    Fuel = adViewModel.Fuel,
+                    Description = adViewModel.Description,
+                    Price = adViewModel.Price,
+                    User = user
+                };
 
                 this.dbContext.Add(ad);
                 await this.dbContext.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(ad);
+            return View();
         }
 
         // GET: Ad/Edit/5
@@ -181,12 +201,24 @@ namespace KRCars1298.Controllers
                 return NotFound();
             }
 
-            var ad = await this.dbContext.Ads.FindAsync(id);
+            var ad = await this.dbContext.Ads.Include(a => a.Model).ThenInclude(m => m.Brand).FirstOrDefaultAsync(a => a.Id == id);
             if (ad == null)
             {
                 return NotFound();
             }
-            return View(ad);
+
+            ManageAdViewModel adViewModel = new ManageAdViewModel()
+            {
+                Brand = ad.Model.Brand.Name,
+                Model = ad.Model.Name,
+                ImageUrl = ad.ImageUrl,
+                Year = ad.Year,
+                Fuel = ad.Fuel,
+                Description = ad.Description,
+                Price = ad.Price
+            };
+
+            return View(adViewModel);
         }
 
         // POST: Ad/Edit/5
@@ -195,23 +227,41 @@ namespace KRCars1298.Controllers
         [Authorize(Roles = "User")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("ModelId,ImageUrl,Year,Fuel,Description,Price,Id")] Ad ad)
+        public async Task<IActionResult> Edit(Guid id, ManageAdViewModel adViewModel)
         {
-            if (id != ad.Id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try
                 {
+                    Ad ad = this.dbContext.Ads.FirstOrDefault(a => a.Id == id);
+
+                    Model model = this.dbContext.Models.Include(m => m.Brand)
+                                        .FirstOrDefault(m => m.Name == adViewModel.Model &&
+                                                        m.Brand.Name == adViewModel.Brand);
+
+                    if (model == null)
+                    {
+                        return View(adViewModel);
+                    }
+
+                    string currentUser = base.User.Identity.Name;
+                    User user = await this.userManager.FindByNameAsync(currentUser);
+
+                    ad.Model = model;
+                    ad.ModelId = model.Id;
+                    ad.ImageUrl = adViewModel.ImageUrl;
+                    ad.Year = adViewModel.Year;
+                    ad.Fuel = adViewModel.Fuel;
+                    ad.Description = adViewModel.Description;
+                    ad.Price = adViewModel.Price;
+                    ad.User = user;
+
                     this.dbContext.Update(ad);
                     await this.dbContext.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!AdExists(ad.Id))
+                    if (!AdExists(id))
                     {
                         return NotFound();
                     }
@@ -222,7 +272,7 @@ namespace KRCars1298.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(ad);
+            return View(adViewModel);
         }
 
         // GET: Ad/Delete/5
@@ -234,14 +284,26 @@ namespace KRCars1298.Controllers
                 return NotFound();
             }
 
-            var ad = await this.dbContext.Ads
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var ad = await this.dbContext.Ads.Include(a => a.Model).ThenInclude(m => m.Brand)
+                                                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (ad == null)
             {
                 return NotFound();
             }
 
-            return View(ad);
+            ManageAdViewModel adViewModel = new ManageAdViewModel()
+            {
+                Brand = ad.Model.Brand.Name,
+                Model = ad.Model.Name,
+                ImageUrl = ad.ImageUrl,
+                Year = ad.Year,
+                Fuel = ad.Fuel,
+                Description = ad.Description,
+                Price = ad.Price
+            };
+
+            return View(adViewModel);
         }
 
         // POST: Ad/Delete/5
@@ -253,7 +315,7 @@ namespace KRCars1298.Controllers
             var ad = await this.dbContext.Ads.FindAsync(id);
             this.dbContext.Ads.Remove(ad);
             await this.dbContext.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(MyAds));
         }
 
         private bool AdExists(Guid id)
