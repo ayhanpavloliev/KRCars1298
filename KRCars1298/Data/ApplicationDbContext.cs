@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Reflection.Emit;
 
 namespace KRCars1298.Data
 {
@@ -29,6 +30,13 @@ namespace KRCars1298.Data
                                                             .Build();
 
             optionsBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+        }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<Brand>().HasIndex(u => u.Name).IsUnique();
         }
     }
 }
