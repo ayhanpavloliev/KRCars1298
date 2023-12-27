@@ -20,19 +20,25 @@ namespace KRCars1298.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class RegisterModel : PageModel
     {
+        private const string ADMIN_ROLE_NAME = "Admin";
+        private const string USER_ROLE_NAME = "User";
+
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
 
         public RegisterModel(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
+            RoleManager<IdentityRole> roleManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _roleManager = roleManager;
             _logger = logger;
             _emailSender = emailSender;
         }
@@ -111,11 +117,11 @@ namespace KRCars1298.Areas.Identity.Pages.Account
                     bool isAdmin = Input.Email == "admin@email.com";
                     if (isAdmin)
                     {
-                        await this._userManager.AddToRoleAsync(user, "Admin");
+                        await HandleRoleAsync(ADMIN_ROLE_NAME, user);
                     }
                     else
                     {
-                        await this._userManager.AddToRoleAsync(user, "User");
+                        await HandleRoleAsync(USER_ROLE_NAME, user);
                     }
 
                     _logger.LogInformation("User created a new account with password.");
@@ -149,6 +155,16 @@ namespace KRCars1298.Areas.Identity.Pages.Account
 
             // If we got this far, something failed, redisplay form
             return Page();
+        }
+
+        private async Task HandleRoleAsync(string roleName, User user)
+        {
+            if (!await _roleManager.RoleExistsAsync(roleName))
+            {
+                await _roleManager.CreateAsync(new(roleName));
+            }
+
+            await this._userManager.AddToRoleAsync(user, roleName);
         }
     }
 }
