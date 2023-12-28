@@ -72,21 +72,18 @@ namespace KRCars1298.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return ValidationProblem();
+
+            IdentityRole role = await this.roleManager.FindByIdAsync(id);
+            role.Name = roleViewModel.Name;
+
+            var result = await this.roleManager.UpdateAsync(role);
+            if (result.Succeeded)
             {
-                IdentityRole role = await this.roleManager.FindByIdAsync(id);
-                role.Name = roleViewModel.Name;
-
-                var result = await this.roleManager.UpdateAsync(role);
-                if (result.Succeeded)
-                {
-                    return RedirectToAction(nameof(Index));
-                }
-
-                return BadRequest();
+                return RedirectToAction(nameof(Index));
             }
 
-            return ValidationProblem();
+            return BadRequest();
         }
 
         // GET: Model/Delete/5

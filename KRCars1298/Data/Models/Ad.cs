@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
+
 namespace KRCars1298.Data.Models
 {
     public class Ad : BaseModel

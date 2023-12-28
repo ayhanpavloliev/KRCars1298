@@ -1,8 +1,8 @@
-﻿namespace KRCars1298.Data.Models
-{
-    using System;
-    using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
+namespace KRCars1298.Data.Models
+{
     public class BaseModel
     {
         public BaseModel()
