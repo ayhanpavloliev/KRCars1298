@@ -10,6 +10,10 @@ namespace KRCars1298.Data.Models.ViewModels.AdViewModels
 
         [Required]
         [StringLength(50, MinimumLength = 2)]
+        public string VehicleTypeName { get; set; }
+
+        [Required]
+        [StringLength(50, MinimumLength = 2)]
         public string BrandName { get; set; }
 
         [Required]

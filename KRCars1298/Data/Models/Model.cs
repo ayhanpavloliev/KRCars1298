@@ -14,5 +14,12 @@ namespace KRCars1298.Data.Models
 
         [Required]
         public Brand Brand { get; set; }
+
+        [Required]
+        [Display(Name = "Vehicle Type")]
+        public VehicleType VehicleType { get; set; }
+
+        [Required]
+        public Guid VehicleTypeId { get; set; }
     }
 }

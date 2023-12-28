@@ -2,12 +2,28 @@
 @model IEnumerable<AllAdsListViewModel>
 
 @{
-    ViewData["Title"] = "All Ads";
+    ViewData["Title"] = "Ads";
 }
 
-<h1>All Ads</h1>
+<h1>Ads</h1>
 
-<table class="table">
+<form asp-controller="Ad" asp-action="Index"
+      data-ajax="true"
+      data-ajax-method="Get"
+      data-ajax-update="product"
+      data-ajax-mode="replace">
+    @Html.DropDownList("VehicleType", (IEnumerable<SelectListItem>) ViewBag.VehicleTypes, null, new { @class = "form-control", @onchange="filterVehicleType(this.value)" })
+</form>
+
+@section Scripts {
+    <script>
+        function filterVehicleType(val) {
+            window.location.href = "/Ad/Index?vehicleType=" + val;
+        }
+    </script>
+}
+
+<table class="table" style="display: block">
     <thead>
         <tr>
             <th>
@@ -31,29 +47,29 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                <a asp-controller="Ad" asp-action="PublicDetails" asp-route-id="@item.Id">
+        @foreach (var item in Model) {
+            <tr>
+                <td>
+                    <a asp-controller="Ad" asp-action="PublicDetails" asp-route-id="@item.Id">
                         @Html.DisplayFor(modelItem => item.CarFullName)
-                </a>
-            </td>
-            <td>
-                <img src="@item.ImageUrl" style="width: 10em; height: 5em"></img>
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Year)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Fuel)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Price)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.City)
-            </td>
-        </tr>
-}
+                    </a>
+                </td>
+                <td>
+                    <img src="@item.ImageUrl" style="width: 10em; height: 5em"></img>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Year)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Fuel)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Price)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.City)
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

@@ -8,6 +8,8 @@ using KRCars1298.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using KRCars1298.Data.Models.ViewModels.AdViewModels;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Routing;
 
 namespace KRCars1298.Controllers
 {
@@ -23,9 +25,13 @@ namespace KRCars1298.Controllers
         }
 
         // GET: Ad
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index([FromQuery] string vehicleType = "all")
         {
-            Ad[] ads = this.dbContext.Ads.Include(a => a.User).ToArray();
+            Ad[] ads = await this.dbContext.Ads.Include(a => a.User)
+                                               .Include(a => a.Model).ThenInclude(m => m.VehicleType)
+                                               .Where(a => vehicleType.Equals("all", StringComparison.OrdinalIgnoreCase) ||
+                                                           a.Model.VehicleType.Name == vehicleType)
+                                               .ToArrayAsync();
             AllAdsListViewModel[] adsViewModels = new AllAdsListViewModel[ads.Length];
 
             for (int i = 0; i < ads.Length; i++)
@@ -39,22 +45,31 @@ namespace KRCars1298.Controllers
                     Price = ads[i].Price,
                 };
 
-                Model model = this.dbContext.Models.FirstOrDefault(m => m.Id == ads[i].ModelId);
+                Model model = await this.dbContext.Models.FirstOrDefaultAsync(m => m.Id == ads[i].ModelId);
                 adsViewModels[i].Model = model.Name;
-                adsViewModels[i].Brand = this.dbContext.Brands.FirstOrDefault(b => b.Id == model.BrandId).Name;
+                adsViewModels[i].Brand = (await this.dbContext.Brands.FirstOrDefaultAsync(b => b.Id == model.BrandId)).Name;
 
-                adsViewModels[i].City = this.dbContext.Users.FirstOrDefault(u => u.Id == ads[i].User.Id).City;
+                adsViewModels[i].City = (await this.dbContext.Users.FirstOrDefaultAsync(u => u.Id == ads[i].User.Id)).City;
             }
+
+            var vehicleTypes = this.dbContext.VehicleTypes.Select(vt => vt.Name).ToList();
+            vehicleTypes.Add("All");
+            ViewBag.VehicleTypes = new SelectList(vehicleTypes.OrderBy(vt => vt));
 
             return View(adsViewModels);
         }
 
-        [Authorize(Roles="User")]
-        public async Task<IActionResult> MyAds()
+        [Authorize(Roles = "User")]
+        public async Task<IActionResult> MyAds([FromQuery] string vehicleType = "all")
         {
             string currentUserName = base.User.Identity.Name;
 
-            Ad[] ads = this.dbContext.Ads.Include(a => a.User).Where(a => a.User.UserName == currentUserName).ToArray();
+            Ad[] ads = await this.dbContext.Ads.Include(a => a.User)
+                                               .Include(a => a.Model).ThenInclude(m => m.VehicleType)
+                                               .Where(a => a.User.UserName == currentUserName && 
+                                                           vehicleType.Equals("all", StringComparison.OrdinalIgnoreCase) ||
+                                                           a.Model.VehicleType.Name == vehicleType)
+                                               .ToArrayAsync();
             AdsListBaseViewModel[] adsViewModels = new AdsListBaseViewModel[ads.Length];
 
             for (int i = 0; i < ads.Length; i++)
@@ -68,10 +83,14 @@ namespace KRCars1298.Controllers
                     Price = ads[i].Price,
                 };
 
-                Model model = this.dbContext.Models.FirstOrDefault(m => m.Id == ads[i].ModelId);
+                Model model = await this.dbContext.Models.FirstOrDefaultAsync(m => m.Id == ads[i].ModelId);
                 adsViewModels[i].Model = model.Name;
-                adsViewModels[i].Brand = this.dbContext.Brands.FirstOrDefault(b => b.Id == model.BrandId).Name;
+                adsViewModels[i].Brand = (await this.dbContext.Brands.FirstOrDefaultAsync(b => b.Id == model.BrandId)).Name;
             }
+
+            var vehicleTypes = this.dbContext.VehicleTypes.Select(vt => vt.Name).ToList();
+            vehicleTypes.Add("All");
+            ViewBag.VehicleTypes = new SelectList(vehicleTypes.OrderBy(vt => vt));
 
             return View(adsViewModels);
         }
@@ -86,14 +105,16 @@ namespace KRCars1298.Controllers
             }
 
             var ad = await this.dbContext.Ads.Include(a => a.Model).ThenInclude(m => m.Brand)
-                .FirstOrDefaultAsync(a => a.Id == id);
+                                             .Include(a => a.Model).ThenInclude(m => m.VehicleType)
+                                             .FirstOrDefaultAsync(a => a.Id == id);
 
             AdDetailsBaseViewModel adViewModel = new AdDetailsBaseViewModel()
             {
                 Id = ad.Id,
+                VehicleTypeName = ad.Model.VehicleType.Name,
                 BrandName = ad.Model.Brand.Name,
                 ModelName = ad.Model.Name,
-                ImageUrl= ad.ImageUrl,
+                ImageUrl = ad.ImageUrl,
                 Year = ad.Year,
                 Fuel = ad.Fuel,
                 Description = ad.Description,
@@ -117,12 +138,14 @@ namespace KRCars1298.Controllers
             }
 
             var ad = await this.dbContext.Ads.Include(a => a.Model).ThenInclude(m => m.Brand)
-                                                .Include(a => a.User)
-                                                .FirstOrDefaultAsync(a => a.Id == id);
+                                             .Include(a => a.Model).ThenInclude(m => m.VehicleType)
+                                             .Include(a => a.User)
+                                             .FirstOrDefaultAsync(a => a.Id == id);
 
             AdFullDetailsViewModel adViewModel = new AdFullDetailsViewModel()
             {
                 Id = ad.Id,
+                VehicleTypeName = ad.Model.VehicleType.Name,
                 BrandName = ad.Model.Brand.Name,
                 ModelName = ad.Model.Name,
                 ImageUrl = ad.ImageUrl,
@@ -146,10 +169,7 @@ namespace KRCars1298.Controllers
 
         [Authorize(Roles = "User")]
         // GET: Ad/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
+        public IActionResult Create() => View();
 
         // POST: Ad/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -161,9 +181,9 @@ namespace KRCars1298.Controllers
         {
             if (ModelState.IsValid)
             {
-                Model model = this.dbContext.Models.Include(m => m.Brand)
-                                    .FirstOrDefault(m => m.Name == adViewModel.Model &&
-                                                    m.Brand.Name == adViewModel.Brand);
+                Model model = await this.dbContext.Models.Include(m => m.Brand)
+                                                         .FirstOrDefaultAsync(m => m.Name == adViewModel.Model &&
+                                                                                   m.Brand.Name == adViewModel.Brand);
 
                 if (model == null)
                 {
@@ -186,7 +206,7 @@ namespace KRCars1298.Controllers
                     User = user
                 };
 
-                this.dbContext.Add(ad);
+                await this.dbContext.AddAsync(ad);
                 await this.dbContext.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -202,7 +222,8 @@ namespace KRCars1298.Controllers
                 return NotFound();
             }
 
-            var ad = await this.dbContext.Ads.Include(a => a.Model).ThenInclude(m => m.Brand).FirstOrDefaultAsync(a => a.Id == id);
+            var ad = await this.dbContext.Ads.Include(a => a.Model).ThenInclude(m => m.Brand)
+                                             .FirstOrDefaultAsync(a => a.Id == id);
             if (ad == null)
             {
                 return NotFound();
@@ -234,11 +255,11 @@ namespace KRCars1298.Controllers
             {
                 try
                 {
-                    Ad ad = this.dbContext.Ads.FirstOrDefault(a => a.Id == id);
+                    Ad ad = await this.dbContext.Ads.FirstOrDefaultAsync(a => a.Id == id);
 
-                    Model model = this.dbContext.Models.Include(m => m.Brand)
-                                        .FirstOrDefault(m => m.Name == adViewModel.Model &&
-                                                        m.Brand.Name == adViewModel.Brand);
+                    Model model = await this.dbContext.Models.Include(m => m.Brand)
+                                                             .FirstOrDefaultAsync(m => m.Name == adViewModel.Model &&
+                                                                                       m.Brand.Name == adViewModel.Brand);
 
                     if (model == null)
                     {
@@ -262,14 +283,12 @@ namespace KRCars1298.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!AdExists(id))
+                    if (!await AdExistsAsync(id))
                     {
                         return NotFound();
                     }
-                    else
-                    {
-                        throw;
-                    }
+
+                    throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -286,7 +305,7 @@ namespace KRCars1298.Controllers
             }
 
             var ad = await this.dbContext.Ads.Include(a => a.Model).ThenInclude(m => m.Brand)
-                                                .FirstOrDefaultAsync(m => m.Id == id);
+                                             .FirstOrDefaultAsync(m => m.Id == id);
 
             if (ad == null)
             {
@@ -319,9 +338,9 @@ namespace KRCars1298.Controllers
             return RedirectToAction(nameof(MyAds));
         }
 
-        private bool AdExists(Guid id)
+        private async Task<bool> AdExistsAsync(Guid id)
         {
-            return this.dbContext.Ads.Any(e => e.Id == id);
+            return await this.dbContext.Ads.AnyAsync(e => e.Id == id);
         }
     }
 }

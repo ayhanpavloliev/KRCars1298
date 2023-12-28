@@ -7,6 +7,22 @@
 
 <h1>My Ads</h1>
 
+<form asp-controller="Ad" asp-action="Index"
+      data-ajax="true"
+      data-ajax-method="Get"
+      data-ajax-update="product"
+      data-ajax-mode="replace">
+    @Html.DropDownList("VehicleType", (IEnumerable<SelectListItem>) ViewBag.VehicleTypes, null, new { @class = "form-control", @onchange="filterVehicleType(this.value)" })
+</form>
+
+@section Scripts {
+    <script>
+        function filterVehicleType(val) {
+            window.location.href = "/Ad/MyAds?vehicleType=" + val;
+        }
+    </script>
+}
+
 <p>
     <a asp-action="Create">Create New</a>
 </p>

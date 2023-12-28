@@ -26,9 +26,6 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        @*<li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>*@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Ad" asp-action="Index">All Ads</a>
                         </li>
@@ -48,7 +45,9 @@
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="" asp-controller="Model" asp-action="Index">Models</a>
                                 </li>
-
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="VehicleType" asp-action="Index">Vehicle Types</a>
+                                </li>
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="" asp-controller="Role" asp-action="Index">Roles</a>
                                 </li>
@@ -86,6 +85,7 @@
                 {
                     <a asp-area="" asp-controller="Brand" asp-action="Index" style="margin-left: 0.5em; margin-right: 0.5em">Brands</a>
                     <a asp-area="" asp-controller="Model" asp-action="Index" style="margin-left: 0.5em; margin-right: 0.5em">Models</a>
+                    <a asp-area="" asp-controller="VehicleType" asp-action="Index" style="margin-left: 0.5em; margin-right: 0.5em">Vehicle Types</a>
                     <a asp-area="" asp-controller="Role" asp-action="Index" style="margin-left: 0.5em; margin-right: 0.5em">Roles</a>
                 }
             }

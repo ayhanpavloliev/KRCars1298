@@ -1,10 +1,8 @@
 ﻿using KRCars1298.Data.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Reflection.Emit;
 
 namespace KRCars1298.Data
 {
@@ -22,6 +20,8 @@ namespace KRCars1298.Data
         public DbSet<Brand> Brands { get; set; }
 
         public DbSet<Model> Models { get; set; }
+
+        public DbSet<VehicleType> VehicleTypes { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

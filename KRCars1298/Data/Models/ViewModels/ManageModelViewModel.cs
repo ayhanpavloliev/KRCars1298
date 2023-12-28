@@ -6,6 +6,10 @@ namespace KRCars1298.Data.Models.ViewModels
     {
         [Required]
         [StringLength(50, MinimumLength = 2)]
+        public string VehicleType { get; set; }
+
+        [Required]
+        [StringLength(50, MinimumLength = 2)]
         public string Name { get; set; }
 
         [Required]

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -10,8 +9,6 @@ using KRCars1298.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
 using KRCars1298.Data.Models.ViewModels;
-using System.Xml.Linq;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace KRCars1298.Controllers
 {
@@ -28,7 +25,8 @@ namespace KRCars1298.Controllers
         // GET: Model
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Models.Include(m => m.Brand);
+            var applicationDbContext = _context.Models.Include(m => m.Brand)
+                                                      .Include(m => m.VehicleType);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -40,9 +38,9 @@ namespace KRCars1298.Controllers
                 return NotFound();
             }
 
-            var model = await _context.Models
-                .Include(m => m.Brand)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var model = await _context.Models.Include(m => m.Brand)
+                                             .Include(m => m.VehicleType)
+                                             .FirstOrDefaultAsync(m => m.Id == id);
             if (model == null)
             {
                 return NotFound();
@@ -65,29 +63,27 @@ namespace KRCars1298.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ManageModelViewModel viewModel)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return View(viewModel);
+
+            VehicleType vehicleType = await this._context.VehicleTypes.FirstOrDefaultAsync(b => b.Name == viewModel.VehicleType);
+            if (vehicleType is null) return NotFound();
+
+            Brand brand = await this._context.Brands.FirstOrDefaultAsync(b => b.Name == viewModel.BrandName);
+            if (brand is null) return NotFound();
+
+            Model model = new Model()
             {
-                Brand brand = this._context.Brands.FirstOrDefault(b => b.Name == viewModel.BrandName);
+                Id = Guid.NewGuid(),
+                VehicleType = vehicleType,
+                VehicleTypeId = vehicleType.Id,
+                Name = viewModel.Name,
+                Brand = brand,
+                BrandId = brand.Id,
+            };
 
-                if (brand == null)
-                {
-                    return NotFound();
-                }
-
-                Model model = new Model()
-                {
-                    Id = Guid.NewGuid(),
-                    Name = viewModel.Name,
-                    Brand = brand,
-                    BrandId = brand.Id,
-                };
-
-                _context.Add(model);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            //ViewData["BrandId"] = new SelectList(_context.Brands, "Id", "Id", model.BrandId);
-            return View(viewModel);
+            _context.Add(model);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Model/Edit/5
@@ -98,7 +94,9 @@ namespace KRCars1298.Controllers
                 return NotFound();
             }
 
-            var model = _context.Models.Include(m => m.Brand).FirstOrDefault(m => m.Id == id);
+            var model = await _context.Models.Include(m => m.Brand)
+                                             .Include(m => m.VehicleType)
+                                             .FirstOrDefaultAsync(m => m.Id == id);
             if (model == null)
             {
                 return NotFound();
@@ -106,11 +104,11 @@ namespace KRCars1298.Controllers
 
             ManageModelViewModel viewModel = new ManageModelViewModel()
             {
+                VehicleType = model.VehicleType.Name,
                 Name = model.Name,
                 BrandName = model.Brand.Name
             };
 
-            //ViewData["BrandId"] = new SelectList(_context.Brands, "Id", "Id", model.BrandId);
             return View(viewModel);
         }
 
@@ -121,46 +119,48 @@ namespace KRCars1298.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Guid id, ManageModelViewModel viewModel)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return View(viewModel);
+
+            try
             {
-                try
+                VehicleType vehicleType = await _context.VehicleTypes.FirstOrDefaultAsync(vt => vt.Name == viewModel.VehicleType);
+                if (vehicleType == null)
                 {
-                    Brand brand = _context.Brands.FirstOrDefault(b => b.Name == viewModel.BrandName);
-
-                    if (brand == null)
-                    {
-                        return View(viewModel);
-                    }
-
-                    Model model = _context.Models.Include(m => m.Brand).FirstOrDefault(m => m.Id == id);
-
-                    if (model == null)
-                    {
-                        return View(viewModel);
-                    }
-
-                    model.Name = viewModel.Name;
-                    model.Brand = model.Brand;
-                    model.BrandId = model.Brand.Id;
-
-                    _context.Update(model);
-                    await _context.SaveChangesAsync();
+                    return View(viewModel);
                 }
-                catch (DbUpdateConcurrencyException)
+
+                Brand brand = await _context.Brands.FirstOrDefaultAsync(b => b.Name == viewModel.BrandName);
+
+                if (brand == null)
                 {
-                    if (!ModelExists(id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    return View(viewModel);
                 }
-                return RedirectToAction(nameof(Index));
+
+                Model model = await _context.Models.Include(m => m.Brand).FirstOrDefaultAsync(m => m.Id == id);
+
+                if (model == null)
+                {
+                    return View(viewModel);
+                }
+
+                model.VehicleType = model.VehicleType;
+                model.VehicleTypeId = model.VehicleType.Id;
+                model.Name = viewModel.Name;
+                model.Brand = model.Brand;
+                model.BrandId = model.Brand.Id;
+
+                _context.Update(model);
+                await _context.SaveChangesAsync();
             }
-            //ViewData["BrandId"] = new SelectList(_context.Brands, "Id", "Id", viewModel.BrandId);
-            return View(viewModel);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!await ModelExistsAsync(id))
+                {
+                    return NotFound();
+                }
+                else throw;
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Model/Delete/5
@@ -171,9 +171,8 @@ namespace KRCars1298.Controllers
                 return NotFound();
             }
 
-            var model = await _context.Models
-                .Include(m => m.Brand)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var model = await _context.Models.Include(m => m.Brand)
+                                             .FirstOrDefaultAsync(m => m.Id == id);
             if (model == null)
             {
                 return NotFound();
@@ -188,7 +187,7 @@ namespace KRCars1298.Controllers
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var model = await _context.Models.FindAsync(id);
-            Ad[] adsToBeDeleted = _context.Ads.Where(a => a.ModelId == id).ToArray();
+            Ad[] adsToBeDeleted = await _context.Ads.Where(a => a.ModelId == id).ToArrayAsync();
 
             _context.Ads.RemoveRange(adsToBeDeleted);
             _context.Models.Remove(model);
@@ -197,9 +196,9 @@ namespace KRCars1298.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ModelExists(Guid id)
+        private async Task<bool> ModelExistsAsync(Guid id)
         {
-            return _context.Models.Any(e => e.Id == id);
+            return await _context.Models.AnyAsync(e => e.Id == id);
         }
     }
 }
